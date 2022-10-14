@@ -1,4 +1,5 @@
 #include "algs.h"
+#include <iostream>
 
 static int CheckMin(int n1, int n2, int n3)
 {
@@ -63,46 +64,56 @@ int DamLev_Recursion(string src, string trg)
     return DamLev_RecNode(src, src.length(), trg, trg.length());
 }
 
-static int DamLev_RecNodeWithCache(string src, size_t s_len, string trg, size_t t_len, vector<vector<int>> matrix)
+static int DamLev_RecNodeWithCache(string src, size_t s_len, string trg, size_t t_len, vector<vector<int>> &matrix)
 {
     if (s_len * t_len == 0)
+    {
+        int res = max(s_len, t_len);
+        matrix[s_len][t_len] = res;
         return max(s_len, t_len);
+    }
     
     int cost = src[s_len - 1] == trg[t_len - 1] ? 0 : 1;
 
-    int D = 0;
+    int D = INT_MAX;
     if (matrix[s_len - 1][t_len] == INT_MAX)
     {
-        D = (DamLev_RecNode(src, s_len - 1, trg, t_len) + 1);
-        matrix[s_len - 1][t_len] = D;
+        D = (DamLev_RecNodeWithCache(src, s_len - 1, trg, t_len, matrix) + 1);
     }
+    else
+        D = matrix[s_len - 1][t_len] + 1;
     
-    int I = 0;
+    int I = INT_MAX;
     if (matrix[s_len][t_len - 1] == INT_MAX)
     {
-        I = (DamLev_RecNode(src, s_len, trg, t_len - 1) + 1);
-        matrix[s_len - 1][t_len] = I;
+        I = (DamLev_RecNodeWithCache(src, s_len, trg, t_len - 1, matrix) + 1);
     }
+    else
+        I = matrix[s_len][t_len - 1] + 1;
 
-    int S = 0;
+    int S = INT_MAX;
     if (matrix[s_len - 1][t_len - 1] == INT_MAX)
     {
-        S = (DamLev_RecNode(src, s_len - 1, trg, t_len - 1) + cost);
-        matrix[s_len - 1][t_len] = S;
+        S = (DamLev_RecNodeWithCache(src, s_len - 1, trg, t_len - 1, matrix) + cost);
     }
+    else
+        S = matrix[s_len - 1][t_len - 1] + cost;
     
     int min_way = CheckMin(D, I, S);
 
     if (s_len > 1 && t_len > 1 && src[s_len - 1] == trg[t_len - 2] && src[s_len - 2] == trg[t_len - 1])
     {
-        int X = 0;
+        int X = INT_MAX;
         if (matrix[s_len - 2][t_len - 2] == INT_MAX)
         {
-            X = DamLev_RecNode(src, s_len - 2, trg, t_len - 2) + 1;
-            matrix[s_len - 2][t_len - 2] = X;
+            X = DamLev_RecNodeWithCache(src, s_len - 2, trg, t_len - 2, matrix) + 1;
         }
+        else
+            X = matrix[s_len - 2][t_len - 2] + 1;
         min_way = min(min_way, X);
     }
+    if (matrix[s_len][t_len] == INT_MAX || min_way < matrix[s_len][t_len])
+        matrix[s_len][t_len] = min_way;
     return min_way;
 }
 
@@ -119,7 +130,9 @@ int DamLev_RecursionWithCache(string src, string trg)
         for (size_t j = 0; j < M; j++)
             matrix[i][j] = INT_MAX;
     }
-    return DamLev_RecNodeWithCache(src, src.length(), trg, trg.length(), matrix);
+
+    int res = DamLev_RecNodeWithCache(src, src.length(), trg, trg.length(), matrix);
+    return res;
 }
 
 int Lev_Matrix(string src, string trg)
