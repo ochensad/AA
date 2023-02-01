@@ -1,0 +1,31 @@
+\chapter{Аналитический раздел}
+\label{cha:analytical}
+    \section{Нечёткий алгоритм k-means}
+\par Нечёткий алгоритм с-средних был предложен Джоном С. Данном в 1973 году (позднее усовершенствован Дж. Беждеком в 1981 году) как решение проблемы мягкой кластеризации, то есть присвоения каждого документа более чем одному кластеру.[\ref{bib:4}]
+\par Как и его чёткий вариант –- алгоритм k-средних -- данный алгоритм, начиная с некоторого начального разбиения данных, итеративно минимизирует целевую функцию, которой является следующее выражение:
+\begin{equation}\label{formula:func}
+	e_m(D,C) = \sum_{i=1}^{|D|} \sum_{j=1}^{|C|} u_{ij}^{m} \|\vec{d_i} - \vec{\mu_j}\|,
+\end{equation}
+\par где \begin{math}m\end{math} -- степень нечёткости, \begin{math}1 < m < \infty\end{math};
+\par \begin{math}u_{ij}\end{math} -- степень принадлежности \begin{math}i\end{math}-ого документа \begin{math}j\end{math}-ому кластеру,
+\par \begin{math}u_{ij} \in [0;1]\end{math}, \begin{math}\sum_{j=1}^{|C|} u_{ij} = 1\end{math} для любого \begin{math}d_i \in D\end{math};
+\begin{equation}\label{formula:func_1}
+	u_{ij} = \frac {1}{\sum_{k=1}^{|C|} (\frac{\|\vec{d_i} - \vec{c_j}\|}{\|\vec{d_i} - \vec{c_k}\|})^{\frac{2}{m-1}}},
+\end{equation}
+\par где \begin{math}\mu_{j}\end{math} -- центроид, кластера \begin{math}C_{j}, j = \overline{1,|C|}\end{math}, вычисляющийся по формуле:
+\begin{equation}\label{formula:func_2}
+	\mu_{j} = \frac {\sum_{i=1}^{|D|} u_{ij}^m \times \vec{d_i}}{\sum_{i=1}^{|D|} u_{ij}^m}.
+\end{equation}
+	\subsection{Алгоритм в общем виде}
+	\par Вход: массив точек в N-мерном пространстве, количество кластеров \begin{math}|C| = k\end{math}.
+	\begin{enumerate}
+		\item Инициализация матрицы \begin{math}U^0 = (u_{ij}), i = \overline{1, |D|}, j = \overline{1,k}\end{math}, например, случайными числами;
+		\item \begin{math}t = t + 1\end{math}, где t - номер итерации;
+		\item Вычислить текущие центроиды кластеров \begin{math} \{ \vec{\mu_j} \}^t, j = \overline{1, k} \end{math} по формуле (\ref{formula:func_2});
+		\item Обновить матрицу нечёткого разбиения, то есть вычислить \begin{math} U^t = \{ \vec{\mu_j} \} \end{math} по формуле (\ref{formula:func_1});
+		\item Если не достигнуто условие остановки, например, \begin{math} \|U^t - U^{t-1}\| < \varepsilon \end{math}, где \begin{math} 0 < \varepsilon < 1\end{math}, то повторить с пунта 2.
+	\end{enumerate}
+	\par Выход: матрица степеней принадлежности точек кластерам \begin{math} U^t = (u_{ij}) \end{math}.
+	\section*{Вывод}
+\par Был рассмотрен нечёткий алгоритм k-means.
+\newpage

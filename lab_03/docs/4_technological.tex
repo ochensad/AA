@@ -1,4 +1,4 @@
-\chapter{ Технологический раздел}
+\chapter{Технологический раздел}
 \label{cha:technological}
 
     В данном разделе представлены средства, использованные в процессе разработки для реализации задачи, а также листинг кода программы. Кроме того показаны результаты тестирования и анализа затрачиваемой памяти.
@@ -6,268 +6,259 @@
     \section{Средства реализации}
         Для реализации поставленной задачи был использован язык C++, так как имеется большой опыт работы с ним. Для измерения процессорного времени была использована ассемблерная вставка. 
 
+    \section{Сведения о модулях программы}
+    \par Программа состоит из:
+    \begin{itemize}
+        \item main.cpp -- главный файл программы, в нем располагается точка входа;
+        \item algs.cpp -- содержит алгоритмы сортировок;
+        \item time.cpp -- содержит ассемблерную вставку для замера времени.
+    \end{itemize}
 
     \section{Листинг программы}
         В приведенных ниже листингах представлены следующие реализации: 
         \begin{enumerate}
-            \item нерекурсивный алгоритм нахождения расстояния Левенштейна с использованием матрицы (листинг \ref{lst:matr:Levenstein1} \ref{lst:matr:Levenstein2});
-            \item нерекурсивный алгоритм нахождения расстояния Дамерау-Левенштейна с использованием матрицы (листинг \ref{lst:matr:DamLevenstein1} \ref{lst:matr:DamLevenstein2});
-            \item рекурсивный алгоритм нахождения расстояния Дамерау-Левенштейна (листинг \ref{lst:rec:DamLevenstein});
-            \item рекурсивный алгоритм нахождения расстояния Дамерау-Левенштейна с использованием матрицы (кэшированием) (листинг \ref{lst:matr:DamLevCache1} \ref{lst:matr:DamLevCache2}).
+            \item плавная сортировка(листинг \ref{lst:sort:Smooth_1} \ref{lst:sort:Smooth_2}, листинг используемых функций \ref{lst:sort:CountLeo} \ref{lst:sort:GetChild} \ref{lst:sort:RestoreHeap});
+            \item сортировка расчёской (листинг \ref{lst:sort:Comb});
+            \item сортировка слиянием (листинг \ref{lst:sort:Merge}).
         \end{enumerate}
-        
-       
-
-        \begin{lstlisting}[language=C++, label=lst:matr:Levenstein1, caption=Функция поиска расстояния Левенштейна нерекурсивно]
-        	
-int Lev_Matrix(string src, string trg)
+        \par \text{           }
+        \begin{lstlisting}[language=C++, label=lst:sort:CountLeo, caption=Функция создания массива чисел Леонардо]
+static vector<int> CountLeoNums(int len)
 {
-    if (src.length() * trg.length() == 0)
+    int a = 1, b = 1;
+    int tmp = 0;
+    vector<int> nums;
+    while(a <= len)
     {
-        return max(trg.length(), src.length());
+        nums.push_back(a);
+        tmp = a;
+        a = b;
+        b = tmp + b + 1;
     }
-
-    size_t N = src.length() + 1;
-    size_t M = trg.length() + 1;
-
-    vector<vector<int>> matrix (N);
-
-    for (size_t i = 0; i < N; i++)
-        matrix[i].resize(M);
-
-    for (size_t i = 0; i < N; i++)
-        matrix[i][0] = i;
-   \end{lstlisting}
-\par   \text{~~~~~~}
-   \begin{lstlisting}[language=C++, label=lst:matr:Levenstein2, caption=Функция поиска расстояния Левенштейна нерекурсивно]
-    for (size_t j = 0; j < M; j++)
-        matrix[0][j] = j;
-    
-    for (size_t i = 1; i < N; i++)
-    {
-        for (size_t j = 1; j < M; j++)
-        {
-            int cost = src[i - 1] == trg[j - 1] ? 0 : 1;
-            matrix[i][j] = CheckMin(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
-        }
-    }
-    return matrix[N - 1][M - 1];
-}
-        \end{lstlisting}
-	
-        \begin{lstlisting}[language=C++, label=lst:matr:DamLevenstein1, caption=Функция поиска расстояния Дамерау-Левенштейна с использованием матрицы]
-        	
-int DamLev_Matrix(string src, string trg)
-{
-    if (src.length() * trg.length() == 0)
-    {
-        return max(trg.length(), src.length());
-    }
-
-    size_t N = src.length() + 1;
-    size_t M = trg.length() + 1;
-
-    vector<vector<int>> matrix (N);
-
-    for (size_t i = 0; i < N; i++)
-        matrix[i].resize(M);
-
-    for (size_t i = 0; i < N; i++)
-        matrix[i][0] = i;
-    
-    for (size_t j = 0; j < M; j++)
-        matrix[0][j] = j;
-    
-    for (size_t i = 1; i < N; i++)
-    {
-	\end{lstlisting}
-
-\par   \text{~~~~~~}
-\par   \text{~~~~~~}
-\par   \text{~~~~~~}
-	\begin{lstlisting}[language=C++, label=lst:matr:DamLevenstein2, caption=Функция поиска расстояния Дамерау-Левенштейна с использованием матрицы]
-        for (size_t j = 1; j < M; j++)
-        {
-            int cost = src[i - 1] == trg[j - 1] ? 0 : 1;
-            matrix[i][j] = CheckMin(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
-            
-            if (i > 1 && j > 1 && src[i - 1] == trg[j - 2] && src[i - 2] == trg[j - 1])
-                matrix[i][j] = min(matrix[i][j], matrix[i - 2][j - 2] + cost);
-        }
-    }
-    return matrix[N - 1][M - 1];
+    return nums;
 }
         \end{lstlisting}
 
-        \begin{lstlisting}[language=C++, label=lst:rec:DamLevenstein, caption=Функция рекурсивного поиска расстояния Дамерау-Левенштейна]
-        	
-static int DamLev_RecNode(string src, size_t s_len, string trg, size_t t_len)
+        \begin{lstlisting}[language=C++, label=lst:sort:GetChild, caption=Функция получения идексов в куче чисел Леонардо]
+static void GetChild(int i, int k, vector<int> nums, int &t_r, int &t_l, int &k_r, int &k_l)
 {
-    if (s_len * t_len == 0)
-        return max(s_len, t_len);
-    
-    int cost = src[s_len - 1] == trg[t_len - 1] ? 0 : 1;
-
-    int D = DamLev_RecNode(src, s_len - 1, trg, t_len) + 1;
-    int I = DamLev_RecNode(src, s_len, trg, t_len - 1) + 1;
-    int S = DamLev_RecNode(src, s_len - 1, trg, t_len - 1) + cost;
-
-    int min_way = CheckMin(D, I, S);
-
-    if (s_len > 1 && t_len > 1 && src[s_len - 1] == trg[t_len - 2] && src[s_len - 2] == trg[t_len - 1])
-        min_way = min(min_way, DamLev_RecNode(src, s_len - 2, trg, t_len - 2) + 1);
-    return min_way;
-}
-
-int DamLev_Recursion(string src, string trg)
-{
-    return DamLev_RecNode(src, src.length(), trg, trg.length());
+    t_r = i-1;
+    k_r = k-2;
+    t_l = t_r - nums[k_r];
+    k_l = k - 1;
 }
         \end{lstlisting}
-	
-\par   \text{~~~~~~}
 
-\par   \text{~~~~~~}
-\par   \text{~~~~~~}
-        \begin{lstlisting}[language=C++, label=lst:matr:DamLevCache1, caption=Функция рекурсивного поиска расстояния Дамерау-Левенштейна с кэшированием]
-        	
-static int DamLev_RecNodeWithCache(string src, size_t s_len, string trg, size_t t_len, vector<vector<int>> &matrix)
+        \begin{lstlisting}[language=C++, label=lst:sort:RestoreHeap, caption=Функция пересоздания кучи куч чисел Леонардо]
+static void RestoreHeap(vector<int> &list, int i, vector<int> &heap, vector<int> &nums)
 {
-    if (s_len * t_len == 0)
+    int cur = heap.size() - 1;
+    int k = heap[cur];
+    int j = 0;
+    int tmp = 0;
+    while (cur > 0)
     {
-        int res = max(s_len, t_len);
-        matrix[s_len][t_len] = res;
-        return max(s_len, t_len);
-    }
-    
-    int cost = src[s_len - 1] == trg[t_len - 1] ? 0 : 1;
-
-    int D = INT_MAX;
-    if (matrix[s_len - 1][t_len] == INT_MAX)
-    {
-        D = (DamLev_RecNodeWithCache(src, s_len - 1, trg, t_len, matrix) + 1);
-    }
-    else
-        D = matrix[s_len - 1][t_len] + 1;
-    
-    int I = INT_MAX;
-    if (matrix[s_len][t_len - 1] == INT_MAX)
-    {
-        I = (DamLev_RecNodeWithCache(src, s_len, trg, t_len - 1, matrix) + 1);
-    }
-    else
-        I = matrix[s_len][t_len - 1] + 1;
-
-    int S = INT_MAX;
-    if (matrix[s_len - 1][t_len - 1] == INT_MAX)
-    {
-        S = (DamLev_RecNodeWithCache(src, s_len - 1, trg, t_len - 1, matrix) + cost);
-    }
-    else
-        S = matrix[s_len - 1][t_len - 1] + cost;
-    
-    int min_way = CheckMin(D, I, S);
-
- \end{lstlisting}
-\par   \text{~~~~~~}
-
-\par   \text{~~~~~~}
-\par   \text{~~~~~~}
-\begin{lstlisting}[language=C++, label=lst:matr:DamLevCache2, caption=Функция рекурсивного поиска расстояния Дамерау-Левенштейна с кэшированием]
-    if (s_len > 1 && t_len > 1 && src[s_len - 1] == trg[t_len - 2] && src[s_len - 2] == trg[t_len - 1])
-    {
-        int X = INT_MAX;
-        if (matrix[s_len - 2][t_len - 2] == INT_MAX)
+        j = i - nums[k];
+        if ((list[j] > list[i]) && (k < 2 || (list[j] > list[i-1] && list[j] > list[i-2])))
         {
-            X = DamLev_RecNodeWithCache(src, s_len - 2, trg, t_len - 2, matrix) + 1;
+            tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+            i = j;
+            cur--;
+            k = heap[cur];
         }
         else
-            X = matrix[s_len - 2][t_len - 2] + 1;
-        min_way = min(min_way, X);
+            break;
     }
-    if (matrix[s_len][t_len] == INT_MAX || min_way < matrix[s_len][t_len])
-        matrix[s_len][t_len] = min_way;
-    return min_way;
-}
 
-int DamLev_RecursionWithCache(string src, string trg)
-{
-    size_t N = src.length() + 1;
-    size_t M = trg.length() + 1;
-
-    vector<vector<int>> matrix (N);
-
-    for (size_t i = 0; i < N; i++)
+    while (k>=2)
     {
-        matrix[i].resize(M);
-        for (size_t j = 0; j < M; j++)
-            matrix[i][j] = INT_MAX;
-    }
+        int t_right, t_left, k_right, k_left;
+        GetChild(i, k, nums, t_right, t_left, k_right,k_left);
+        if (list[i] < list[t_right] || list[i] < list[t_left])
+        {
+            if (list[t_right] > list[t_left])
+            {
+                tmp = list[i];
+                list[i] = list[t_right];
+        \end{lstlisting}
 
-    int res = DamLev_RecNodeWithCache(src, src.length(), trg, trg.length(), matrix);
-    return res;
+        \begin{lstlisting}[language=C++, label=lst:sort:RestoreHeap, caption=Функция пересоздания кучи куч чисел Леонардо]
+
+                list[t_right] = tmp;
+                i = t_right;
+                k = k_right;
+            }
+            else
+            {
+                tmp = list[i];
+                list[i] = list[t_left];
+                list[t_left] = tmp;
+                i = t_left;
+                k = k_left;
+            }
+        }
+        else
+            break;
+    }
 }
         \end{lstlisting}
+
+
+        \begin{lstlisting}[language=C++, label=lst:sort:Smooth_1, caption=Алгоритм плавной сортировки]
+void SmoothSort(vector<int> &list)
+{
+    vector<int> l_nums = CountLeoNums(list.size());
+
+    vector<int> heap;
+    for (int i = 0; i < (int)list.size(); i++)
+    {
+        if (heap.size() >=2 && heap[heap.size() - 2] == heap[heap.size() - 1] + 1)
+        {
+            heap.pop_back();
+            heap[heap.size() - 1] += 1; 
+        }
+        else
+        {
+            if (heap.size() >= 1 && heap[heap.size() - 1] == 1)
+                heap.push_back(0);
+            else
+                heap.push_back(1);
+        }
+
+        RestoreHeap(list, i, heap, l_nums);
+
+    }
+        \end{lstlisting}
+        \par \text{      }
+        \begin{lstlisting}[language=C++, label=lst:sort:Smooth_2, caption=Алгоритм плавной сортировки]
+    int k;
+    for (int i = list.size() - 1; i >= 0; i--)
+    {
+        if (heap[heap.size() - 1] < 2)
+            heap.pop_back();
+        else
+        {
+            k = heap[heap.size() - 1];
+            heap.pop_back();
+            int t_right, t_left, k_right, k_left;
+            GetChild(i, k, l_nums, t_right, t_left, k_right,k_left);
+            heap.push_back(k_left);
+            RestoreHeap(list, t_left, heap, l_nums);
+            heap.push_back(k_right);
+            RestoreHeap(list, t_right, heap, l_nums);
+        }
+    }
+}
+        \end{lstlisting}
+
+
+        \begin{lstlisting}[language=C++, label=lst:sort:Comb, caption=Алгоритм сортировки расчёской]
+void CombSort(vector<int> &list)
+{
+    const double factor = 1.247;
+    double gapFactor = list.size() / factor;
+    int gap = 0;
+    while (gapFactor > 1)
+    {
+        gap = round(gapFactor);
+
+        for(int i = 0, j = gap;j < (int)list.size(); i++, j++)
+        {
+            if (list[i] > list[j])
+            {
+                int tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
+            }
+        }
+        gapFactor = gapFactor / factor;
+    }
+}
+        \end{lstlisting}
+        \par \text{      }
+        \par \text{      }
+        \par \text{      }
+        \begin{lstlisting}[language=C++, label=lst:sort:Merge, caption=Алгоритм сортировки слиянием]
+vector<int> MergeSort(vector<int> list)
+{
+    if (list.size() == 1 || list.size() == 0)
+        return list;
+    size_t middle = list.size()/2;
+
+    vector<int> L;
+    for(size_t i = 0; i < middle; i++)
+        L.push_back(list[i]);
+    vector<int> R;
+    for(size_t i = middle; i < list.size() ; i++)
+        R.push_back(list[i]);
     
+    R = MergeSort(R);
+    L = MergeSort(L);
+
+    size_t n = 0, m = 0, k = 0;
+    vector<int> C (L.size() + R.size());
+    for(int &l:C)
+        l = 0;
+    
+    while(n < L.size() && m < R.size())
+    {
+        if (L[n] <= R[m])
+        {
+            C[k] = L[n];
+            n++;
+        }
+        else
+        {
+            C[k] = R[m];
+            m++;
+        }
+        k++;
+    }
+    while (n < L.size())
+    {
+        C[k] = L[n];
+        n++;
+        k++;
+    }
+    \end{lstlisting}
+        \par \text{      }
+        \par \text{      }
+        \par \text{      }
+        \begin{lstlisting}[language=C++, label=lst:sort:Merge, caption=Алгоритм сортировки слиянием]
+
+    while (m < R.size())
+    {
+        C[k] = R[m];
+        m++;
+        k++;
+    }
+    return C;
+}
+        \end{lstlisting}
         
     \section{Тестирование}
         В таблице \ref{table:testing} отображён возможный набор тестов
-        для тестирования методом чёрного ящика, результаты которого, 
-        представленные на рисунке \ref{png:testing:result}, подтверждают
-        прохождение программы перечисленных тестов.
+        для тестирования методом чёрного ящика, в соответствующих столбцах таблицы представлены результаты тестирования.
         \begin{table}[h!]
             \caption{Тесты проверки корректности программы}
             \centering
             \begin{tabular}{|c|c|c|c|c|}
             \hline
-            № & строка 1 & строка 2 & \begin{tabular}[c]{@{}c@{}}Ожидаемый результат \\ (Л, Д-Л)\end{tabular} & \begin{tabular}[c]{@{}c@{}}Фактический результат\end{tabular} \\ \hline
-            1 & "скат"      & "скат"      & 0, 0                                           								 &0, 0
-                                                                                      \\ \hline
-            2 & "кот"        & "скат"       & 2, 2                                                                        & 2, 2                                                                         \\ \hline
-            3 & "скат"     & "скат"     & 0, 0                                                                        & 0, 0                                                                         \\ \hline
-            4 & "скат"     & "сакт"     & 2, 1                                                                        & 2, 1                                                                         \\ \hline
+            № & Input & Smooth & Comb & Merge \\\hline
+            1 & 1 2 3 4 & 1 2 3 4 & 1 2 3 4 & 1 2 3 4 \\ \hline
+            2 & 4 3 2 1 & 1 2 3 4 & 1 2 3 4 & 1 2 3 4 \\ \hline
+            3 & 2 3 1 4 & 1 2 3 4 & 1 2 3 4 & 1 2 3 4 \\ \hline
+            4 & 1 1 1 1 & 1 1 1 1 & 1 1 1 1 & 1 1 1 1 \\ \hline
+            5 & 1 & 1 & 1 & 1 \\ \hline
             \end{tabular}
             \label{table:testing}
         \end{table}
 
-        \begin{figure}[h!]
-            \centering
-            \includegraphics[scale=1]{testing.png}
-            \caption{Результаты тестирования}
-            \label{png:testing:result}
-        \end{figure}
-
-    \section{Сравнительный анализ потребляемой памяти}  
-        Аналитически посчитаем затрачиваемую память на строках $s_1$, $s_2$ длиной n и m соответственно. Так как, с точки зрения памяти алгоритмы Левенштейна и Дамерау-Левенштейна не отличаются, достаточно рассмотреть лишь разные реализации данных алгоритмов.
-        
-        Использование памяти для матричного алгоритма теоритически определяется формулой (\ref{formula:memory:matr}):
-        \begin{equation}
-            V = 2(n+1)sizeof(int) + 2sizeof(int) + 2sizeof(size\_t) + sizeof(char)(n + m)
-            \label{formula:memory:matr}
-        \end{equation}
-    	Где:
-    	\begin{enumerate}
-    			\item $2(n+1)sizeof(int)$ - память под две строки (замена матрицы в моей реализации);
-    			\item $2sizeof(int)$ - память под размеры строк;
-    			\item $2sizeof(size\_t)$ - память под итераторы;
-    			\item $sizeof(char)(n + m)$ - память под сами строки как аргументы функции.
-    	\end{enumerate}
-        
-
-        Использование памяти для рекурсивного алгоритма зависит от максимальной глубины стека вызовов. Так как эта величина равна сумме длин входящих строк, то теоритически определяется формулой (\ref{formula:memory:rec}):
-        \begin{equation}
-            V = sizeof(char)(n + m)  + (n + m)(2sizeof(char*) + 3sizeof(int))
-            \label{formula:memory:rec}
-        \end{equation}
-        	Где:
-    	\begin{enumerate}
-    		\item $sizeof(char)(n + m)$ - память под аргументы функции;
-    		\item $(n + m)(2sizeof(char*) + 3sizeof(int))$ - выделенные рекурсией ресурсы умноженные на максимальную глубину стека вызовов.
-   	    \end{enumerate}
-	
 	\section*{Вывод}
 	
 	
-	Были разработаны и протестированы спроектированные алгоритмы, приведены расчеты сравнительного анализа потребляемой памяти, а также указаны средства реализации поставленной задачи.
+	Были разработаны и протестированы спроектированные алгоритмы и указаны средства реализации поставленной задачи.
     	
 \newpage

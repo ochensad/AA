@@ -1,0 +1,258 @@
+\chapter{Технологический раздел}
+\label{cha:technological}
+
+    В данном разделе представлены средства, использованные в процессе разработки для реализации задачи, а также листинг кода программы. Кроме того показаны результаты тестирования и анализа затрачиваемой памяти.
+
+    \section{Средства реализации}
+        Для реализации поставленной задачи был использован язык C++, так как имеется большой опыт работы с ним. Для измерения процессорного времени была использована ассемблерная вставка. 
+
+    \section{Сведения о модулях программы}
+    \par Программа состоит из:
+    \begin{itemize}
+        \item main.cpp -- главный файл программы, в нем располагается точка входа;
+        \item algs.cpp -- содержит алгоритмы умножения матриц;
+        \item time.cpp -- содержит ассемблерную вставку для замера времени.
+    \end{itemize}
+
+    \section{Листинг программы}
+        В приведенных ниже листингах представлены следующие реализации: 
+        \begin{enumerate}
+            \item классический алгоритм(листинг \ref{lst:mult:Classic});
+            \item сортировка расчёской (листинг \ref{lst:mult:Vinograd});
+            \item сортировка слиянием (листинг \ref{lst:mult:VinogradOpt}).
+        \end{enumerate}
+        \par \text{           }
+        \begin{lstlisting}[language=C++, label=lst:mult:Classic, caption=Алгоритм классического умножения]
+vector<vector<int>> ClassicMultMatrix(vector<vector<int>> matr1, vector<vector<int>> matr2)
+{
+    vector<vector<int>> res (matr1.size());
+    
+    for(auto &i: res)
+        i.resize(matr2[0].size());
+    if (matr1[0].size() != matr2.size())
+    {
+        cout << "Ошибка: кол-во столбцов матрицы 1 != кол-ву строк матрицы 2" << endl;
+        return res;
+    }
+    for (int i = 0; i < matr1.size(); i++)
+    {
+    \end{lstlisting}
+    \begin{lstlisting}[language=C++, label=lst:mult:Classic_1, caption=Алгоритм классического умножения]
+        for (int j = 0; j < matr2[0].size(); j++)
+        {
+            res[i][j] = 0;
+            for (int k = 0; k < matr1[0].size(); k++)
+            {
+                res[i][j] += matr1[i][k] * matr2[k][j];
+            }
+        }
+    }
+
+    return res;
+}
+        \end{lstlisting}
+
+        \begin{lstlisting}[language=C++, label=lst:mult:Vinograd, caption=Алгоритм Винограда без оптимизации]
+vector<vector<int>> VinogradMultMatrix(vector<vector<int>> matr1, vector<vector<int>> matr2)
+{
+    vector<vector<int>> res (matr1.size());
+    
+    for(auto &i: res)
+        i.resize(matr2[0].size());
+    
+    if (matr1[0].size() != matr2.size())
+    {
+        cout << "Ошибка: кол-во столбцов матрицы 1 != кол-ву строк матрицы 2" << endl;
+        return res;
+    }
+    vector<int> H(matr1.size());
+    
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        H[i] = 0;
+        for (int j = 0; j < matr1[0].size() / 2; j++)
+        {
+            H[i] = H[i] + matr1[i][j * 2] * matr1[i][j * 2 + 1];
+        }
+    }
+    
+    vector<int> V (matr2[0].size());
+    
+    for (int i = 0; i < matr2[0].size(); i++)
+    {
+        V[i] = 0;
+        \end{lstlisting}
+        \begin{lstlisting}[language=C++, label=lst:mult:Vinograd_1, caption=Алгоритм Винограда без оптимизации]
+        for (int j = 0; j < matr2.size() / 2; j++)
+        {
+            V[i] = V[i] + matr2[j * 2][i] * matr2[j * 2 + 1][i];
+        }
+    }
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        for (int j = 0; j < matr2[0].size(); j++)
+        {
+            res[i][j] = -H[i] - V[j];
+            for (int k = 0; k < matr1[0].size() / 2; k++)
+            {
+                res[i][j] = res[i][j] + (matr1[i][2 * k + 1] + matr2[2 * k][j]) * (matr1[i][2 * k] + matr2[2 * k + 1][j]);
+            }
+        }
+    }
+
+    if (matr1[0].size() % 2 == 1)
+    {
+        for (int i = 0; i < matr1.size(); i++)
+        {
+            for (int j = 0; j < matr2[0].size(); j++)
+            {
+                res[i][j] = res[i][j] + matr1[i][matr1[0].size() - 1] * matr2[matr1[0].size() - 1][j];
+            }
+        }
+    }
+
+    return res;
+}
+        \end{lstlisting}
+
+        \begin{lstlisting}[language=C++, label=lst:mult:VinogradOpt, caption=Алгоритм Винограда с оптимизацией]
+vector<vector<int>> VinogradOptimMultMatrix(vector<vector<int>> matr1, vector<vector<int>> matr2)
+{
+    vector<vector<int>> res (matr1.size());
+    
+    for(auto &i: res)
+        i.resize(matr2[0].size());
+    
+    if (matr1[0].size() != matr2.size())
+    \end{lstlisting}
+    \par \text{   }
+        \begin{lstlisting}[language=C++, label=lst:mult:VinogradOpt_1, caption=Алгоритм Винограда с оптимизацией]
+    {
+        cout << "Ошибка: кол-во столбцов матрицы 1 != кол-ву строк матрицы 2" << endl;
+        return res;
+    }
+    
+    vector<int> H(matr1.size());
+    
+    
+    int m1_2 = matr1[0].size()/2;
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        H[i] = 0;
+        for (int j = 0; j < m1_2; j++)
+        {
+            int j_2 = j<<1;
+            H[i] += matr1[i][j_2] * matr1[i][j_2 + 1];
+        }
+    }
+    
+    vector<int> V (matr2[0].size());
+    
+    int m2_2 = matr2.size()/2;
+    
+    for (int i = 0; i < matr2[0].size(); i++)
+    {
+        V[i] = 0;
+        for (int j = 0; j < m2_2; j++)
+        {
+            int j_2 = j<<1;
+            V[i] += matr2[j_2][i] * matr2[j_2 + 1][i];
+        }
+    }
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        for (int j = 0; j < matr2[0].size(); j++)
+        {
+            int buf = -H[i] - V[j];
+            for (int k = 0; k < matr1[0].size() / 2; k++)
+            {
+                int k_2 = k << 1;
+                buf += (matr1[i][k_2 + 1] + matr2[k_2][j]) * (matr1[i][k_2] + matr2[k_2 + 1][j]);
+            }
+            \end{lstlisting}
+
+        \begin{lstlisting}[language=C++, label=lst:mult:VinogradOpt_2, caption=Алгоритм Винограда с оптимизацией]
+            res[i][j] = buf;
+        }
+    }
+
+    if (matr1[0].size() % 2 == 1)
+    {
+        for (int i = 0; i < matr1.size(); i++)
+        {
+            for (int j = 0; j < matr2[0].size(); j++)
+            {
+                res[i][j] += matr1[i][matr1[0].size() - 1] * matr2[matr1[0].size() - 1][j];
+            }
+        }
+    }
+
+    return res;
+}
+        \end{lstlisting}
+    \subsection{Оптимизация алгоритма Винограда}
+    \par В рамках данной лабораторной было реализовано 3 оптимизации:
+    \begin{enumerate}
+    \item Избавление от умножения на 2 с помощью побитового сдвига;
+    \item Замена \begin{math}H\left[i\right] = H\left[i\right] + ...\end{math} на \begin{math}H\left[i\right] += ...\end{math} \begin{lstlisting}[language=C++, label=lst:mult:VinogradOpt_2, caption=Оптимизация алгоритма винограда №1 и №2]
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        H[i] = 0;
+        for (int j = 0; j < m1_2; j++)
+        {
+            int j_2 = j<<1;
+            H[i] += matr1[i][j_2] * matr1[i][j_2 + 1];
+        }
+    }
+    \end{lstlisting}
+    \par \text{     }
+    \par \text{     }
+
+    \par \text{     }
+    \par \text{     }
+
+    \par \text{     }
+    \par \text{     }
+
+    \par \text{     }
+    \par \text{     }
+    \item Перевычисление некоторых слагаемых алгоритма \begin{lstlisting}[language=C++, label=lst:mult:VinogradOpt_2, caption=Оптимизация алгоритма винограда №3]
+    for (int i = 0; i < matr1.size(); i++)
+    {
+        for (int j = 0; j < matr2[0].size(); j++)
+        {
+            int buf = -H[i] - V[j];
+            for (int k = 0; k < matr1[0].size() / 2; k++)
+            {
+                int k_2 = k << 1;
+                buf += (matr1[i][k_2 + 1] + matr2[k_2][j]) * (matr1[i][k_2] + matr2[k_2 + 1][j]);
+            }
+            res[i][j] = buf;
+        }
+    }
+    \end{lstlisting}
+    \end{enumerate}
+    \section{Тестирование}
+
+        В таблице \ref{table:testing} отображён возможный набор тестов
+        для тестирования методом чёрного ящика, в соответствующих столбцах таблицы представлены результаты тестирования.
+        \begin{table}[h!]
+            \caption{Тесты проверки корректности программы}
+            \centering
+            \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            № & Matrix 1 & Matrix 2& Classic & Vinograd & Vinograd Opt \\\hline
+            1 & \text{ } & \text{ } & NULL & NULL & NULL \\ \hline
+            2 & $\begin{bmatrix} 2 \end{bmatrix}$ & $\begin{bmatrix} 2 \end{bmatrix}$ & $\begin{bmatrix} 4 \end{bmatrix}$ & $\begin{bmatrix} 4 \end{bmatrix}$ & $\begin{bmatrix} 4 \end{bmatrix}$\\ \hline
+            3 & $\begin{bmatrix} 1 & 1 \\ 2 & 2 \end{bmatrix}$ & $\begin{bmatrix} 1 & 1 \\ 2 & 2 \end{bmatrix}$ & $\begin{bmatrix} 3 & 3 \\ 6 & 6\end{bmatrix}$ & $\begin{bmatrix} 3 & 3 \\ 6 & 6 \end{bmatrix}$ & $\begin{bmatrix} 3 & 3 \\ 6 & 6 \end{bmatrix}$\\ \hline
+            4 & $\begin{bmatrix} 1 & 2 & 3 \\ 1 & 2 & 3 \end{bmatrix}$ & $\begin{bmatrix} 1 & 1 \\ 2 & 2 \\ 3 & 3 \end{bmatrix}$ & $\begin{bmatrix} 14 & 14 \\ 14 & 14\end{bmatrix}$ & $\begin{bmatrix} 14 & 14 \\ 14 & 14 \end{bmatrix}$ & $\begin{bmatrix} 14 & 14 \\ 14 & 14 \end{bmatrix}$\\ \hline
+            \end{tabular}
+            \label{table:testing}
+        \end{table}
+
+	\section*{Вывод}
+	
+	
+	Были разработаны и протестированы спроектированные алгоритмы и указаны средства реализации поставленной задачи.
+    	
+\newpage

@@ -1,0 +1,253 @@
+\chapter{Технологический раздел}
+\label{cha:technological}
+
+    В данном разделе представлены средства, использованные в процессе разработки для реализации задачи, а также листинг кода программы. Кроме того показаны результаты тестирования.
+
+    \section{Требования к ПО}
+        Программное обеспечение должно удовлетворять следующим требованиям:
+        \begin{itemize}
+            \item программа получает на вход размер очереди;
+            \item программа выдает журналирвоание работы конвейера;
+            \item генератор строк выдает ненулевые строки, состоящие из строчных и заглавных букв;
+            \item шифрование каждым методом выполняется с разными ключами.
+        \end{itemize}
+    \section{Средства реализации}
+        Для реализации ПО был выбран компилируемый многопоточный язык программирования Golang, поскольку язык отличается легкой и быстрой сборкой программ и автоматическим управлением памяти.
+
+    \section{Листинг программы}
+        В приведенных ниже листингах представлены следующие реализации: 
+        \begin{enumerate}
+            \item паралельного конвейера (листинги \ref{lst:alg:Parallel}, \ref{lst:alg:Parallel1}, \ref{lst:alg:Parallel2});
+            \item синхронного конвейера (листинги \ref{lst:alg:Sync}, \ref{lst:alg:Sync1});
+            \item XOR-шифра (листинг \ref{lst:alg:Xor});
+            \item шифра Цезаря (листинг \ref{lst:alg:Caesar}).
+        \end{enumerate}
+        \par \text{           }
+        \begin{lstlisting}[language=Go, label=lst:alg:Parallel, caption=Реализация параллельного конвейера]
+func Pipeline(count int, ch chan int) *Queue {
+
+    first := make(chan *PipeTask, count)
+    second := make(chan *PipeTask, count)
+    third := make(chan *PipeTask, count)
+
+    line := initQueue(count)
+\end{lstlisting}
+\par \text{           }
+\par \text{           }
+\par \text{           }
+\par \text{           }
+\begin{lstlisting}[language=Go, label=lst:alg:Parallel1, caption=Реализация параллельного конвейера]
+    gen_string := func() {
+        for {
+            select {
+            case pipe_task := <-first:
+                pipe_task.generated = true
+
+                len_s := rand.Intn(100)
+                pipe_task.source = chiperalg.GenerateRune(len_s)
+                pipe_task.start_generating = time.Now()
+                pipe_task.dst = chiperalg.XorChiperFirst(pipe_task.source, len_s)
+
+                pipe_task.end_generatig = time.Now()
+
+                second <- pipe_task
+            }
+        }
+    }
+
+    get_table := func() {
+        for {
+            select {
+            case pipe_task := <-second:
+                pipe_task.skip_table_made = true
+
+                pipe_task.start_table = time.Now()
+
+                pipe_task.dst = chiperalg.CaesarChiper(pipe_task.dst, len(pipe_task.dst))
+                pipe_task.end_table = time.Now()
+
+                third <- pipe_task
+            }
+        }
+    }
+    match := func() {
+        for {
+            select {
+            case pipe_task := <-third:
+                pipe_task.pattern_mached = true
+
+                pipe_task.start_match = time.Now()
+                pipe_task.dst = chiperalg.XorChiperSecond(pipe_task.dst, len(pipe_task.dst))
+                pipe_task.end_match = time.Now()
+\end{lstlisting}
+
+\begin{lstlisting}[language=Go, label=lst:alg:Parallel2, caption=Реализация параллельного конвейера]
+
+                line.enqueue(pipe_task)
+                if pipe_task.num == count-1 {
+                    ch <- 0
+                }
+            }
+        }
+    }
+
+    go gen_string()
+    go get_table()
+    go match()
+
+    for i := 0; i < count; i++ {
+        pipe_task := new(PipeTask)
+        pipe_task.num = i + 1
+        first <- pipe_task
+    }
+    return line
+}
+\end{lstlisting}
+\par \text{  }
+\begin{lstlisting}[language=C++, label=lst:alg:Sync, caption=Реализация синхронного конвейера]
+func chiper_xor_first(task *PipeTask) *PipeTask {
+    task.generated = true
+
+    len_s := rand.Intn(100)
+    task.source = chiperalg.GenerateRune(len_s)
+    task.start_generating = time.Now()
+    task.dst = chiperalg.XorChiperFirst(task.source, len_s)
+
+    task.end_generatig = time.Now()
+
+    return task
+}
+
+func chiper_caesar(task *PipeTask) *PipeTask {
+    task.skip_table_made = true
+
+    task.start_table = time.Now()
+\end{lstlisting}
+\par \text{  }
+\par \text{  }
+\par \text{  }
+\begin{lstlisting}[language=C++, label=lst:alg:Sync1, caption=Реализация синхронного конвейера]
+    task.dst = chiperalg.CaesarChiper(task.dst, len(task.dst))
+    task.end_table = time.Now()
+
+    return task
+}
+
+func chiper_xor_second(task *PipeTask) *PipeTask {
+    task.pattern_mached = true
+
+    task.start_match = time.Now()
+    task.dst = chiperalg.XorChiperSecond(task.dst, len(task.dst))
+    task.end_match = time.Now()
+
+    return task
+}
+
+func Sync(count int) *Queue {
+
+    line_first := initQueue(count)
+    line_second := initQueue(count)
+    line_third := initQueue(count)
+
+    for i := 0; i < count; i++ {
+        pipe_task := new(PipeTask)
+        pipe_task = chiper_xor_first(pipe_task)
+        line_first.enqueue(pipe_task)
+        if len(line_first.queue) != 0 {
+            pipe_task = chiper_caesar(line_first.dequeue())
+            line_second.enqueue(pipe_task)
+            if len(line_second.queue) != 0 {
+                pipe_task = chiper_xor_second(line_second.dequeue())
+                line_third.enqueue(pipe_task)
+            }
+        }
+    }
+    return line_third
+}
+        \end{lstlisting}
+\par \text{ }
+\par \text{ }
+\par \text{ }
+\par \text{ }
+\par \text{ }
+\par \text{  }
+\begin{lstlisting}[language=C++, label=lst:alg:Xor, caption=Реализация алгоритма XOR шифрования]
+func XorChiperFirst(src []rune, size int) []rune {
+
+    var smeshenie = 8
+    var itog = make([]rune, size)
+    for i := range src {
+        itog[i] = rune(int(src[i]) ^ smeshenie)
+    }
+    return itog
+}
+
+func XorChiperSecond(src []rune, size int) []rune {
+
+    var smeshenie = 3
+    var itog = make([]rune, size)
+    for i := range src {
+        itog[i] = rune(int(src[i]) ^ smeshenie)
+    }
+    return itog
+}
+\end{lstlisting}
+\par \text{ }
+\begin{lstlisting}[language=C++, label=lst:alg:Caesar, caption=Реализация алгоритма шифра Цезаря]
+func CaesarChiper(src []rune, size int) []rune {
+    var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    var smeshenie = 6
+    var itog = make([]rune, size)
+    for i := range src {
+        var mesto = search(letters, src[i])
+        var newmesto = (mesto + smeshenie) % len(letters)
+        if search(letters, src[i]) > -1 {
+            itog[i] = letters[newmesto]
+        } else {
+            itog[i] = src[i]
+        }
+    }
+    return itog
+}
+        \end{lstlisting}
+
+        
+    \section{Тестирование ПО}
+
+        Тестирование ПО проводилось написанием журналирования для вывода
+        содержания заявок очереди
+        \par \text{  }
+\begin{lstlisting}[language=C++, label=lst:testing, caption=Тестирование ПО]
+func Log(qu *Queue) {
+    fmt.Println("")
+    line := qu.queue
+    for i := range line {
+        if line[i] != nil {
+            fmt.Printf("%3v & %10v & %10v & %10v & %10v &  \n", i, string(line[i].source), string(line[i].dst1), string(line[i].dst2), string(line[i].dst3))
+        }
+    }
+}
+        \end{lstlisting}
+
+        В таблице \ref{table:testing} отображёны результаты на очереди размером в 5 элементов.
+
+        \begin{table}[h!]
+            \caption{Тесты проверки корректности программы}
+            \centering
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+№ & Source  & XOR key-1                  & Caesar                     & XOR key-2  \\ \hline
+1 & k       & c                          & i                          & j          \\ \hline
+2 & sBtgPSb & \{J|oX{[}j                 & \{P|ud{[}p                 & xS\_vgXs   \\ \hline
+3 & cw      & k\_                        & q\_                        & r|         \\ \hline
+4 & XDpVR   & PLx\textasciicircum{}Z     & VRD\textasciicircum{}f     & UQG{]}e    \\ \hline
+5 & LMwwVtm & DE\_\_\textasciicircum{}|e & JK\_\_\textasciicircum{}|k & IH||{]}\_h \\ \hline
+\end{tabular}
+            \label{table:testing}
+        \end{table}
+
+	\section*{Вывод}
+	
+	Было написано и протестировано программное обеспечение для решения поставленной задачи.
+    	
+\newpage

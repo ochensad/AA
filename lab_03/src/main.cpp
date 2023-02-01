@@ -2,6 +2,8 @@
 #include "../inc/algs.hpp"
 #include "../inc/time.hpp"
 #include <cinttypes>
+#include <fstream>
+#include <string>
 
 static void PrintVect(vector<int> a)
 {
@@ -16,8 +18,7 @@ int main(void)
     while (k)
     {
         cout << "Input 1 for personal using" << endl;
-        cout << "Input 2 for testing" << endl;
-        cout << "Input 3 for having graphics" << endl;
+        cout << "Input 2 for having graphics" << endl;
         cout << "Input 0 for exit" << endl;
         int choise = 0;
         cin >> choise;
@@ -60,58 +61,259 @@ int main(void)
             }
         case 2:
             {
-                vector<vector<int>> tests ={
-                    {1,2,3,4,5,6,6,7,8},
-                    {9,8,7,6,5,4,3,2,1},
-                    {3,7,2,3,4,5,9,1,2,0},
-                    {1,1,1,1,1,1,5,5,5,5,5},
-                    {9,3,0,2,6,4,2,7,4,1,0,5,8,3,5,4},
-                    {1},
-                    {},
-                    {1,3,2},
-                    {9,1,2,4,2,0,0,0,8,5,5,8}
-                };
-                int64_t start = 0, end = 0;
-                for (size_t j = 0; j < tests.size(); j++)
+                vector<vector<int>> tests_luch;
+                vector<int> tmp_1;
+                for(int i = 1; i < 2; i++)
                 {
-                    cout << "Test " << j + 1<< " : ";
-
-                    cout << "Smooth Sort" << endl;
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 11; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 51; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 101; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 251; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 501; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 1001; i++)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_luch.push_back(tmp_1);
+                int64_t start = 0, end = 0;
+                ofstream fout;
+                fout.open("Luch.txt");
+                for (size_t j = 0; j < tests_luch.size(); j++)
+                {
                     for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
                     {
-                        vector<int> a_1 = tests[j];
-                        cout << "Smooth Sort" << endl;
+                        vector<int> a_1 = tests_luch[j];
                         start+=tick();
                         SmoothSort(a_1);
                         end+=tick();
                     }
-                    print_result(start / NUMBER_OF_RUNS, end / NUMBER_OF_RUNS);
-                    printf("Sort -  byte\n\n");
 
-                    cout << "Comb Sort" << endl;
+                    double g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
                     for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
                     {
-                        vector<int> a_1 = tests[j];
-                        cout << "Smooth Sort" << endl;
+                        vector<int> a_1 = tests_luch[j];
                         start+=tick();
                         CombSort(a_1);
                         end+=tick();
                     }
-                    print_result(start / NUMBER_OF_RUNS, end / NUMBER_OF_RUNS);
-                    printf("Sort -  byte\n\n");
-
-                    cout << "Merge Sort" << endl;
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
                     for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
                     {
-                        vector<int> a_1 = tests[j];
-                        cout << "Smooth Sort" << endl;
+                        vector<int> a_1 = tests_luch[j];
                         start+=tick();
                         MergeSort(a_1);
                         end+=tick();
                     }
-                    print_result(start / NUMBER_OF_RUNS, end / NUMBER_OF_RUNS);
-                    printf("Sort -  byte\n\n");
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << endl;
+                    start = 0;
+                    end = 0;
                 }
+                fout.close();
+
+                vector<vector<int>> tests_hud;
+                tmp_1.clear();
+                for(int i = 1; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 10; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 50; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 100; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 250; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 500; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1000; i > 0; i--)
+                {
+                    tmp_1.push_back(i);
+                }
+                tests_hud.push_back(tmp_1);
+                start = 0, end = 0;
+                fout.open("Hud.txt");
+                for (size_t j = 0; j < tests_hud.size(); j++)
+                {
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_hud[j];
+                        start+=tick();
+                        SmoothSort(a_1);
+                        end+=tick();
+                    }
+
+                    double g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_hud[j];
+                        start+=tick();
+                        CombSort(a_1);
+                        end+=tick();
+                    }
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_hud[j];
+                        start+=tick();
+                        MergeSort(a_1);
+                        end+=tick();
+                    }
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << endl;
+                    start = 0;
+                    end = 0;
+                }
+                fout.close();
+                vector<vector<int>> tests_pr;
+                tmp_1.clear();
+                for(int i = 1; i < 2; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 11; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 51; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 101; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 251; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 501; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                tmp_1.clear();
+                for(int i = 1; i < 1001; i++)
+                {
+                    tmp_1.push_back(1 + std::rand()/((RAND_MAX + 1u)/250));
+                }
+                tests_pr.push_back(tmp_1);
+                start = 0, end = 0;
+                fout.open("Proizv.txt");
+                for (size_t j = 0; j < tests_pr.size(); j++)
+                {
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_pr[j];
+                        start+=tick();
+                        SmoothSort(a_1);
+                        end+=tick();
+                    }
+
+                    double g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_pr[j];
+                        start+=tick();
+                        CombSort(a_1);
+                        end+=tick();
+                    }
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << " ";
+                    start = 0;
+                    end = 0;
+                    for(size_t i = 0; i < NUMBER_OF_RUNS; i++)
+                    {
+                        vector<int> a_1 = tests_pr[j];
+                        start+=tick();
+                        MergeSort(a_1);
+                        end+=tick();
+                    }
+                    g = (double)(end / NUMBER_OF_RUNS - start / NUMBER_OF_RUNS)/HZ;
+                    fout << to_string(g) << endl;
+                    start = 0;
+                    end = 0;
+                }
+                fout.close();
+                system("graphics.py");
+                break;
             }
         case 0:
             {

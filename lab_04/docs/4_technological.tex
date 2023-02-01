@@ -1,0 +1,153 @@
+\chapter{Технологический раздел}
+\label{cha:technological}
+
+    В данном разделе представлены средства, использованные в процессе разработки для реализации задачи, а также листинг кода программы. Кроме того показаны результаты тестирования и анализа затрачиваемой памяти.
+
+    \section{Средства реализации}
+        Для реализации поставленной задачи был использован язык C++, так как имеется большой опыт работы с ним. Для измерения процессорного времени была использована ассемблерная вставка. 
+
+    \section{Сведения о модулях программы}
+    \par Программа состоит из:
+    \begin{itemize}
+        \item main.cpp -- главный файл программы, в нем располагается точка входа;
+        \item Alg.cpp -- содержит последовательный и параллельный нечёткие алгоритмы k-means;
+        \item time.cpp -- содержит ассемблерную вставку для замера времени.
+    \end{itemize}
+
+    \section{Листинг программы}
+        В приведенных ниже листингах представлены следующие реализации: 
+        \begin{enumerate}
+            \item последовательный нечёткий алгоритм k-means(листинг \ref{lst:alg:Fuzzy};
+            \item параллельный нечёткий алгоритм k-means (листинг \ref{lst:alg:FuzzyPar}).
+        \end{enumerate}
+        \par \text{           }
+        \begin{lstlisting}[language=C++, label=lst:alg:Fuzzy, caption=Последовательный нечёткий алгоритм k-means]
+vector<vector<double>> FuzzyCMeans (vector<vector<double>> X, int c, int m, double eps)
+{
+    int n = X.size();
+    int r = X[0].size();
+    vector<vector<double>> centers = generateZeroFill(c, r);
+    vector<vector<double>> Wprev = generateRandFill(n, c); 
+    vector<vector<double>> W = Wprev;
+    while (true){
+        for (int i=0; i<c; i++)
+        {
+            vector<double> num(X[0].size());
+            double den = 0.0;
+            for (int j=0; j<n; j++)
+            {
+\end{lstlisting}
+\par \text{  }
+\begin{lstlisting}[language=C++, label=lst:alg:Fuzzy_1, caption=Последовательный нечёткий алгоритм k-means]
+
+                num = SumVecVec(num, MulNumVec(pow(W[j][i], m),X[j]));
+                den += pow(W[j][i], m);
+            }
+            centers[i] = DevVecNum(num, den);
+        }
+        double max_diff = 0.0;
+        for (int i=0; i<n; i++)
+            for (int j=0; j<c; j++)
+            {
+                double total = 0.0;
+                for (int k=0; k<c; k++)
+                {
+                    total += pow(distance(X[i], centers[j]) / distance(X[i], centers[k]), 2/(m-1));
+                }
+                W[i][j] = 1.0/total;
+                max_diff = max(fabs(W[i][j]-Wprev[i][j]), max_diff);
+                Wprev[i][j] = W[i][j];
+            }
+        if (max_diff < eps)
+            break;
+    }
+    return W;
+}
+        \end{lstlisting}
+\begin{lstlisting}[language=C++, label=lst:alg:FuzzyPar, caption=Параллельный нечёткий алгоритм k-means]
+vector<vector<double>> FuzzyCMeansParallel(vector<vector<double>> X, int c, int m, double eps, int threads)
+{
+    int n = X.size();
+    int r = X[0].size();
+    vector<vector<double>> centers = generateZeroFill(c, r);
+    vector<vector<double>> Wprev = generateRandFill(n, c); 
+    vector<vector<double>> W = Wprev;
+    while (true){
+        // обновляем центры кластеров
+        for (int i=0; i<c; i++)
+        {
+            vector<double> num(X[0].size());
+            double den = 0.0;
+            for (int j=0; j<n; j++)
+            {
+\end{lstlisting}
+\par \text{ }
+\begin{lstlisting}[language=C++, label=lst:alg:FuzzyPar_1, caption=Параллельный нечёткий алгоритм k-means]
+                num = SumVecVec(num, MulNumVec(pow(W[j][i], m),X[j]));
+                den += pow(W[j][i], m);
+            }
+            centers[i] = DevVecNum(num, den);
+        }
+           //обновляем вероятности W и считаем расстояние между матрицами W и Wprev
+        vector<double> maxs(threads);
+        int count = n / threads;
+        int k = 0;
+        vector<thread> threads_arr;
+        for(int i = 0; i < threads; i++)
+        {
+            for(int j = 1; j < count+1; j++, k++)
+                ;
+            if (i == threads - 1 && k != n)
+            {
+                k++;
+            }
+            threads_arr.push_back(std::thread(ParallelMatrix, std::ref(W), std::ref(Wprev), std::ref(maxs[i]),i*count,k,c, X, centers, m));
+        }
+        double max_diff = 0.0;
+        for(int i = 0; i < threads; i++)
+        {
+            threads_arr[i].join();
+            max_diff = max(maxs[i], max_diff);
+            
+        }
+        if (max_diff < eps)
+            break;
+    }
+    return W;
+}
+        \end{lstlisting}
+
+        
+    \section{Тестирование}
+        В таблице \ref{table:testing} отображён возможный набор тестов
+        для тестирования методом чёрного ящика, в соответствующих столбцах таблицы представлены результаты тестирования.
+        \begin{table}[h!]
+            \caption{Тесты проверки корректности программы}
+            \centering
+            \begin{tabular}{|c|c|c|c|}
+            \hline
+            № & Input & Fuzzy & FuzzyPar \\\hline
+            1 & $\begin{bmatrix} 1 & 1 \\ 2 & 2 \end{bmatrix}$ & $\begin{bmatrix} 0 & nan \\ nan & 0 \end{bmatrix}$ & $\begin{bmatrix} 0 & nan \\ nan & 0 \end{bmatrix}$  \\ \hline
+            2 & $\begin{bmatrix} 1.4 & 1.0 & 1.3 \\ 4.3 & 4.0 & 4.8 \\ 9.5 & 9.2 & 9.1 \end{bmatrix}$ & 
+            $\begin{bmatrix} 0.0221843 & 0.977816 \\
+0.208947 & 0.791053 \\
+0.999001 & 0.000998518 \end{bmatrix}$  & $\begin{bmatrix} 0.0221843 & 0.977816 \\
+0.208947 & 0.791053 \\
+0.999001 & 0.000998518 \end{bmatrix}$  \\ \hline
+            3 & $\begin{bmatrix} 1.4 & 1.4 \\ 2.5 & 2.4 \\ 10.3 & 10.4 \\ 6.3 & 6.4 \end{bmatrix}$ & $\begin{bmatrix} 0.00742315 & 0.992577 \\ 
+0.0043424 & 0.995658 \\
+0.968385 & 0.0316153 \\
+0.754249 & 0.245751  \end{bmatrix}$ & $\begin{bmatrix} 0.00742315 & 0.992577 \\ 
+0.0043424 & 0.995658 \\
+0.968385 & 0.0316153 \\
+0.754249 & 0.245751  \end{bmatrix}$ \\ \hline
+            \end{tabular}
+            \label{table:testing}
+        \end{table}
+
+	\section*{Вывод}
+	
+	
+	Были разработаны и протестированы спроектированные алгоритмы и указаны средства реализации поставленной задачи.
+    	
+\newpage
